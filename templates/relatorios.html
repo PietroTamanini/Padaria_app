@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios - A Turma do Forno{% endblock %}
+
+{% block content %}
+<div class="relatorios">
+    <h2><i class="fas fa-chart-bar"></i> Relatórios</h2>
+    
+    <div class="relatorios-tabs">
+        <button class="tab-btn active" onclick="abrirTab(event, 'vendas')">Vendas</button>
+        <button class="tab-btn" onclick="abrirTab(event, 'movimentacoes')">Movimentações</button>
+        <button class="tab-btn" onclick="abrirTab(event, 'pontos')">Pontos de Clientes</button>
+    </div>
+    
+    <div id="vendas" class="tab-content" style="display: block;">
+        <h3>Relatório de Vendas</h3>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Data</th>
+                        <th>Produtos</th>
+                        <th>Total</th>
+                        <th>Vendedor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venda in vendas %}
+                    <tr>
+                        <td>{{ venda.id }}</td>
+                        <td>{{ venda.data }}</td>
+                        <td>
+                            {% for produto in venda.produtos %}
+                            {{ produto.nome }} (x{{ produto.quantidade }})<br>
+                            {% endfor %}
+                        </td>
+                        <td>R$ {{ "%.2f"|format(venda.total) }}</td>
+                        <td>{{ venda.vendedor }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div id="movimentacoes" class="tab-content">
+        <h3>Movimentações de Estoque</h3>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Data</th>
+                        <th>Produto</th>
+                        <th>Quantidade</th>
+                        <th>Tipo</th>
+                        <th>Usuário</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mov in movimentacoes %}
+                    <tr>
+                        <td>{{ mov.id }}</td>
+                        <td>{{ mov.data }}</td>
+                        <td>{{ mov.produto_nome }}</td>
+                        <td>{{ mov.quantidade }}</td>
+                        <td>{{ mov.tipo }}</td>
+                        <td>{{ mov.usuario }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div id="pontos" class="tab-content">
+        <h3>Pontos dos Clientes</h3>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>CPF</th>
+                        <th>Pontos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ponto in pontos %}
+                    <tr>
+                        <td class="cpf-mask">{{ ponto.cpf }}</td>
+                        <td>{{ ponto.pontos }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// Sistema de abas para relatórios
+function abrirTab(evt, tabName) {
+    const tabcontent = document.getElementsByClassName('tab-content');
+    for (let i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = 'none';
+    }
+    
+    const tablinks = document.getElementsByClassName('tab-btn');
+    for (let i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(' active', '');
+    }
+    
+    document.getElementById(tabName).style.display = 'block';
+    evt.currentTarget.className += ' active';
+}
+
+// Aplicar máscara de CPF nos relatórios
+document.addEventListener('DOMContentLoaded', function() {
+    const cpfCells = document.querySelectorAll('td.cpf-mask');
+    cpfCells.forEach(cell => {
+        let value = cell.textContent.replace(/\D/g, '');
+        if (value.length === 11) {
+            cell.textContent = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        }
+    });
+});
+</script>
+
+<style>
+.relatorios-tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    background: #f8f9fa;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.tab-btn:hover {
+    background: #e9ecef;
+}
+
+.tab-btn.active {
+    border-bottom-color: #8b5a2b;
+    color: #8b5a2b;
+}
+
+.tab-content {
+    display: none;
+}
+
+.produtos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.produto-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.produto-info h4 {
+    margin-bottom: 5px;
+    color: #6b4226;
+}
+
+.produto-info p {
+    margin: 3px 0;
+    color: #6c757d;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 500px;
+    position: relative;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    right: 15px;
+    top: 10px;
+}
+
+.close:hover {
+    color: black;
+}
+</style>
+{% endblock %}

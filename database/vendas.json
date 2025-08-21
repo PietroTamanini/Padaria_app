@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "data": "20/08/2025 23:15",
+        "produtos": [
+            {
+                "id": 1,
+                "nome": "P\u00e3o Franc\u00eas",
+                "preco": 0.5,
+                "quantidade": 1
+            }
+        ],
+        "total": 0.5,
+        "vendedor": "Administrador Principal"
+    },
+    {
+        "id": 2,
+        "data": "20/08/2025 23:15",
+        "produtos": [
+            {
+                "id": 1,
+                "nome": "P\u00e3o Franc\u00eas",
+                "preco": 0.5,
+                "quantidade": 1
+            }
+        ],
+        "total": 0.5,
+        "vendedor": "Administrador Principal"
+    }
+]

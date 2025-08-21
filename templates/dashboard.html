@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - A Turma do Forno{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+    
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-bread-slice"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ produtos|length }}</h3>
+                <p>Produtos Cadastrados</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ vendas|length }}</h3>
+                <p>Vendas Realizadas</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ users|length }}</h3>
+                <p>Usuários Cadastrados</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ pontos|length }}</h3>
+                <p>Clientes com Pontos</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="dashboard-actions">
+        {% if session.is_admin %}
+        <div class="action-card">
+            <h3><i class="fas fa-user-cog"></i> Administração</h3>
+            <p>Gerencie usuários e permissões do sistema</p>
+            <a href="{{ url_for('gerenciar_usuarios') }}" class="btn-primary">Gerenciar Usuários</a>
+        </div>
+        {% endif %}
+        
+        <div class="action-card">
+            <h3><i class="fas fa-cash-register"></i> Ponto de Venda</h3>
+            <p>Realize vendas e registre transações</p>
+            <a href="{{ url_for('pdv') }}" class="btn-primary">Acessar PDV</a>
+        </div>
+        
+        <div class="action-card">
+            <h3><i class="fas fa-boxes"></i> Controle de Estoque</h3>
+            <p>Gerencie produtos e quantidades</p>
+            <a href="{{ url_for('estoque') }}" class="btn-primary">Ver Estoque</a>
+        </div>
+        
+        <div class="action-card">
+            <h3><i class="fas fa-chart-bar"></i> Relatórios</h3>
+            <p>Visualize relatórios de vendas e estoque</p>
+            <a href="{{ url_for('relatorios') }}" class="btn-primary">Ver Relatórios</a>
+        </div>
+        
+        <div class="action-card">
+            <h3><i class="fas fa-plus-circle"></i> Cadastrar Produto</h3>
+            <p>Adicione novos produtos ao sistema</p>
+            <a href="{{ url_for('cadastro_produto') }}" class="btn-primary">Cadastrar</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

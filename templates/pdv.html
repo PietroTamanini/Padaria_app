@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}PDV - A Turma do Forno{% endblock %}
+
+{% block content %}
+<div class="pdv">
+    <h2><i class="fas fa-cash-register"></i> Ponto de Venda (PDV)</h2>
+    
+    <div class="pdv-container">
+        <div class="produtos-list">
+            <h3>Produtos Disponíveis</h3>
+            
+            <div class="form-group">
+                <input type="text" id="busca-produto" placeholder="Buscar produto..." onkeyup="filtrarProdutos()">
+            </div>
+            
+            <div class="produtos-grid" id="produtos-grid">
+                {% for produto in produtos %}
+                <div class="produto-card" data-nome="{{ produto.nome|lower }}">
+                    <div class="produto-info">
+                        <h4>{{ produto.nome }}</h4>
+                        <p>R$ {{ "%.2f"|format(produto.preco) }}</p>
+                        <p>Estoque: {{ produto.quantidade }}</p>
+                    </div>
+                    <button class="btn-primary" 
+                            onclick="adicionarAoCarrinho({{ produto.id }}, '{{ produto.nome }}', {{ produto.preco }})"
+                            {% if produto.quantidade <= 0 %}disabled{% endif %}>
+                        {% if produto.quantidade <= 0 %}Esgotado{% else %}Adicionar{% endif %}
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="carrinho">
+            <h3>Carrinho de Compras</h3>
+            
+            <div class="form-group">
+                <label for="cpf-cliente">CPF do Cliente (opcional):</label>
+                <input type="text" id="cpf-cliente" class="cpf-mask" placeholder="000.000.000-00">
+            </div>
+            
+            <div class="carrinho-items" id="carrinho-items">
+                <!-- Itens do carrinho serão adicionados via JavaScript -->
+            </div>
+            
+            <div class="carrinho-total" id="carrinho-total">Total: R$ 0,00</div>
+            
+            <button class="btn-primary" onclick="finalizarVenda()">Finalizar Venda</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Filtrar produtos na busca
+function filtrarProdutos() {
+    const busca = document.getElementById('busca-produto').value.toLowerCase();
+    const produtos = document.querySelectorAll('.produto-card');
+    
+    produtos.forEach(produto => {
+        const nome = produto.getAttribute('data-nome');
+        if (nome.includes(busca)) {
+            produto.style.display = 'block';
+        } else {
+            produto.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,32 @@
+[
+    {
+        "id": 1,
+        "nome": "Administrador Principal",
+        "email": "admin@admin.turma.do.forno",
+        "senha": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+        "tipo": "admin",
+        "permissoes": [
+            "gerenciar_usuarios",
+            "visualizar_estoque",
+            "alterar_estoque",
+            "realizar_vendas",
+            "cadastrar_produtos",
+            "visualizar_relatorios"
+        ],
+        "data_criacao": "20/08/2025 23:08"
+    },
+    {
+        "id": 2,
+        "nome": "Pietro Ramos Tamanini",
+        "email": "pietroramostamanini2010@gmail.com",
+        "cpf": "14392725901",
+        "senha": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+        "telefone": "(47) 98419-4811",
+        "tipo": "cliente",
+        "permissoes": [
+            "fazer_pedidos"
+        ],
+        "data_criacao": "20/08/2025 23:09",
+        "pontos": 0
+    }
+]

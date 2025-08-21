@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "nome": "P\u00e3o Franc\u00eas",
+        "preco": 0.5,
+        "quantidade": 3,
+        "categoria": "P\u00e3es",
+        "estoque_minimo": 10
+    },
+    {
+        "id": 2,
+        "nome": "Bolo de Chocolate",
+        "preco": 15.0,
+        "quantidade": -18,
+        "categoria": "Bolos",
+        "estoque_minimo": 5
+    },
+    {
+        "id": 3,
+        "nome": "Caf\u00e9",
+        "preco": 5.0,
+        "quantidade": 20,
+        "categoria": "Bebidas",
+        "estoque_minimo": 15
+    }
+]

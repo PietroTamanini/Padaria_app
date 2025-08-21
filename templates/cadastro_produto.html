@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastro de Produto - A Turma do Forno{% endblock %}
+
+{% block content %}
+<div class="cadastro-produto">
+    <h2><i class="fas fa-plus-circle"></i> Cadastro de Produto</h2>
+    
+    <div class="form-container">
+        <form method="POST">
+            <div class="form-group">
+                <label for="nome">Nome do Produto:</label>
+                <input type="text" id="nome" name="nome" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="preco">Preço (R$):</label>
+                <input type="number" id="preco" name="preco" step="0.01" min="0.01" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="quantidade">Quantidade Inicial:</label>
+                <input type="number" id="quantidade" name="quantidade" min="0" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="categoria">Categoria:</label>
+                <select id="categoria" name="categoria" required>
+                    <option value="">Selecione uma categoria</option>
+                    <option value="Pães">Pães</option>
+                    <option value="Bolos">Bolos</option>
+                    <option value="Salgados">Salgados</option>
+                    <option value="Doces">Doces</option>
+                    <option value="Bebidas">Bebidas</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-primary">Cadastrar Produto</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
