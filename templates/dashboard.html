@@ -13,7 +13,7 @@
             </div>
             <div class="stat-info">
                 <h3>{{ produtos|length }}</h3>
-                <p>Produtos Cadastrados</p>
+                <p>Produtos</p>
             </div>
         </div>
         
@@ -23,7 +23,7 @@
             </div>
             <div class="stat-info">
                 <h3>{{ vendas|length }}</h3>
-                <p>Vendas Realizadas</p>
+                <p>Vendas</p>
             </div>
         </div>
         
@@ -33,7 +33,7 @@
             </div>
             <div class="stat-info">
                 <h3>{{ users|length }}</h3>
-                <p>Usuários Cadastrados</p>
+                <p>Usuários</p>
             </div>
         </div>
         
@@ -43,43 +43,132 @@
             </div>
             <div class="stat-info">
                 <h3>{{ pontos|length }}</h3>
-                <p>Clientes com Pontos</p>
+                <p>Pontos</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ pedidos|length }}</h3>
+                <p>Pedidos</p>
             </div>
         </div>
     </div>
     
-    <div class="dashboard-actions">
-        {% if session.is_admin %}
-        <div class="action-card">
-            <h3><i class="fas fa-user-cog"></i> Administração</h3>
-            <p>Gerencie usuários e permissões do sistema</p>
-            <a href="{{ url_for('gerenciar_usuarios') }}" class="btn-primary">Gerenciar Usuários</a>
-        </div>
-        {% endif %}
-        
-        <div class="action-card">
-            <h3><i class="fas fa-cash-register"></i> Ponto de Venda</h3>
-            <p>Realize vendas e registre transações</p>
-            <a href="{{ url_for('pdv') }}" class="btn-primary">Acessar PDV</a>
-        </div>
-        
-        <div class="action-card">
-            <h3><i class="fas fa-boxes"></i> Controle de Estoque</h3>
-            <p>Gerencie produtos e quantidades</p>
-            <a href="{{ url_for('estoque') }}" class="btn-primary">Ver Estoque</a>
-        </div>
-        
-        <div class="action-card">
-            <h3><i class="fas fa-chart-bar"></i> Relatórios</h3>
-            <p>Visualize relatórios de vendas e estoque</p>
-            <a href="{{ url_for('relatorios') }}" class="btn-primary">Ver Relatórios</a>
-        </div>
-        
-        <div class="action-card">
-            <h3><i class="fas fa-plus-circle"></i> Cadastrar Produto</h3>
-            <p>Adicione novos produtos ao sistema</p>
-            <a href="{{ url_for('cadastro_produto') }}" class="btn-primary">Cadastrar</a>
+    {# Mostrar alerta de estoque apenas para RH e estoquistas #}
+    {% if produtos_estoque_baixo and 
+          (has_permission('visualizar_estoque') or has_permission('alterar_estoque')) %}
+    <div class="alerta-estoque">
+        <h3><i class="fas fa-exclamation-triangle"></i> Alertas de Estoque</h3>
+        <div class="produtos-alerta">
+            {% for produto in produtos_estoque_baixo %}
+            <div class="produto-alerta">
+                <strong>{{ produto.nome }}</strong> - 
+                Estoque: {{ produto.quantidade }} | 
+                Mínimo: {{ produto.estoque_minimo }}
+            </div>
+            {% endfor %}
         </div>
     </div>
+    {% endif %}
 </div>
+
+<style>
+.alerta-estoque {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 30px;
+    color: #856404;
+}
+
+.alerta-estoque h3 {
+    color: #856404;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.produtos-alerta {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px;
+}
+
+.produto-alerta {
+    background: rgba(255, 193, 7, 0.2);
+    padding: 10px;
+    border-radius: 5px;
+    border-left: 3px solid #ffc107;
+}
+
+/* Estatísticas */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 5px 15px var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid var(--primary-light);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--background) 0%, #fbeeeb 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--primary);
+    font-size: 1.5rem;
+}
+
+.stat-info h3 {
+    font-size: 2rem;
+    margin-bottom: 5px;
+    color: var(--primary);
+}
+
+.stat-info p {
+    color: var(--text-light);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .dashboard-stats {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+    }
+    
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .stat-info h3 {
+        font-size: 1.5rem;
+    }
+}
+</style>
 {% endblock %}

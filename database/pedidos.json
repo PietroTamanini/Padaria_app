@@ -1,0 +1,140 @@
+[
+    {
+        "id": 1,
+        "cliente_id": 1,
+        "cliente_nome": "Pietro",
+        "produtos": [
+            {
+                "id": 1,
+                "nome": "´1",
+                "preco": 1.0,
+                "quantidade": 1
+            }
+        ],
+        "metodo_pagamento": "dinheiro",
+        "tipo_pedido": "imediato",
+        "total": 1.0,
+        "status": {
+            "entregue": false,
+            "pago": false
+        },
+        "data": "20/09/2025 19:24",
+        "desconto_aplicado": 0
+    },
+    {
+        "id": 2,
+        "cliente_id": 1,
+        "cliente_nome": "Pietro",
+        "produtos": [
+            {
+                "id": 1,
+                "nome": "´1",
+                "preco": 1.0,
+                "quantidade": 1
+            }
+        ],
+        "metodo_pagamento": "dinheiro",
+        "tipo_pedido": "imediato",
+        "total": 1.0,
+        "status": {
+            "entregue": false,
+            "pago": false
+        },
+        "data": "20/09/2025 19:37",
+        "desconto_aplicado": 0
+    },
+    {
+        "id": 3,
+        "cliente_id": 1,
+        "cliente_nome": "Pietro",
+        "produtos": [
+            {
+                "id": 1,
+                "nome": "´1",
+                "preco": 1.0,
+                "quantidade": 1
+            }
+        ],
+        "metodo_pagamento": "dinheiro",
+        "tipo_pedido": "imediato",
+        "total": 1.0,
+        "status": {
+            "entregue": false,
+            "pago": false
+        },
+        "data": "20/09/2025 19:38",
+        "desconto_aplicado": 0
+    },
+    {
+        "id": 4,
+        "cliente_id": 1,
+        "cliente_nome": "Pietro",
+        "produtos": [
+            {
+                "id": 1,
+                "nome": "´1",
+                "preco": 1.0,
+                "quantidade": 1
+            }
+        ],
+        "metodo_pagamento": "dinheiro",
+        "tipo_pedido": "imediato",
+        "total": 1.0,
+        "status": {
+            "entregue": true,
+            "pago": true
+        },
+        "data": "20/09/2025 21:31",
+        "desconto_aplicado": 0,
+        "data_entrega": "20/09/2025 21:31",
+        "data_pagamento": "20/09/2025 21:31"
+    },
+    {
+        "id": 5,
+        "cliente_id": 1,
+        "cliente_nome": "Pietro",
+        "produtos": [
+            {
+                "id": 1,
+                "nome": "´1",
+                "preco": 1.0,
+                "quantidade": 1
+            }
+        ],
+        "metodo_pagamento": "dinheiro",
+        "tipo_pedido": "imediato",
+        "total": 1.0,
+        "status": {
+            "entregue": true,
+            "pago": true
+        },
+        "data": "20/09/2025 22:01",
+        "desconto_aplicado": 0,
+        "data_entrega": "20/09/2025 22:01",
+        "data_pagamento": "20/09/2025 22:01"
+    },
+    {
+        "id": 6,
+        "cliente_id": 1,
+        "cliente_nome": "Pietro",
+        "produtos": [
+            {
+                "id": 1,
+                "nome": "´1",
+                "preco": 1.0,
+                "quantidade": 1
+            }
+        ],
+        "metodo_pagamento": "pix",
+        "tipo_pedido": "imediato",
+        "total": 1.0,
+        "status": {
+            "entregue": true,
+            "pago": true
+        },
+        "data": "20/09/2025 22:02",
+        "desconto_aplicado": 0,
+        "data_entrega": "20/09/2025 22:02",
+        "data_pagamento": "20/09/2025 22:02"
+    }
+]

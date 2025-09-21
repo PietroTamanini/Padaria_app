@@ -1,9 +1,9 @@
 [
     {
         "id": 1,
-        "nome": "Administrador Principal",
-        "email": "admin@admin.turma.do.forno",
-        "senha": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+        "nome": "Pietro",
+        "email": "pietro@admin.turma.do.forno",
+        "senha": "95f1b9d7c3bc69f7ee080c7265083d95307bcc3197ad734fb5f205095c80c7f9",
         "tipo": "admin",
         "permissoes": [
             "gerenciar_usuarios",
@@ -11,22 +11,40 @@
             "alterar_estoque",
             "realizar_vendas",
             "cadastrar_produtos",
-            "visualizar_relatorios"
+            "visualizar_relatorios",
+            "gerenciar_pre_vendas"
         ],
-        "data_criacao": "20/08/2025 23:08"
+        "data_criacao": "20/09/2025 18:35:17"
     },
     {
         "id": 2,
+        "nome": "Francesco",
+        "email": "francesco@admin.turma.do.forno",
+        "senha": "ecd8bb6ac56e748cd085b48836bd64b4ac0fa8f48bde4259f1814f1a1c89a2e2",
+        "tipo": "admin",
+        "permissoes": [
+            "gerenciar_usuarios",
+            "visualizar_estoque",
+            "alterar_estoque",
+            "realizar_vendas",
+            "cadastrar_produtos",
+            "visualizar_relatorios",
+            "gerenciar_pre_vendas"
+        ],
+        "data_criacao": "20/09/2025 18:35:17"
+    },
+    {
+        "id": 3,
         "nome": "Pietro Ramos Tamanini",
         "email": "pietroramostamanini2010@gmail.com",
         "cpf": "14392725901",
-        "senha": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+        "senha": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae",
         "telefone": "(47) 98419-4811",
         "tipo": "cliente",
         "permissoes": [
             "fazer_pedidos"
         ],
-        "data_criacao": "20/08/2025 23:09",
+        "data_criacao": "20/09/2025 21:43:07",
         "pontos": 0
     }
 ]

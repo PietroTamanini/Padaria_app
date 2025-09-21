@@ -1,0 +1,948 @@
+{% extends "base.html" %}
+
+{% block title %}Pré-venda - A Turma do Forno{% endblock %}
+
+{% block content %}
+<div class="pre-venda-container">
+    <h2><i class="fas fa-shopping-bag"></i> Área de Compras</h2>
+    
+    {% if pre_venda_ativa %}
+    <div class="pre-venda-info alert-success">
+        <h3>🎉 Pré-venda Ativa!</h3>
+        <p><strong>Período:</strong> De {{ pre_venda_ativa.data_inicio }} a {{ pre_venda_ativa.data_fim }}</p>
+        <p><strong>Desconto:</strong> {{ pre_venda_ativa.get('desconto_geral', 0) }}% em todos os produtos</p>
+        <p>Faça suas encomendas para retirada futura!</p>
+    </div>
+    {% endif %}
+    
+    <div class="pre-venda-content">
+        <div class="produtos-section">
+            <div class="section-header">
+                <h3>📦 Produtos Disponíveis</h3>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="busca-produto" placeholder="Buscar produto..." onkeyup="filtrarProdutos()">
+                </div>
+            </div>
+            
+            <div class="produtos-grid" id="produtos-grid">
+                {% for produto in produtos %}
+                <div class="produto-card" data-nome="{{ produto.nome|lower }}">
+                    <div class="produto-image">
+                        <i class="fas fa-bread-slice"></i>
+                    </div>
+                    <div class="produto-info">
+                        <h4>{{ produto.nome }}</h4>
+                        {% if pre_venda_ativa and pre_venda_ativa.get('desconto_geral', 0) > 0 %}
+                        <p class="produto-preco">
+                            <span style="text-decoration: line-through; color: #999; font-size: 0.9em;">
+                                R$ {{ "%.2f"|format(produto.preco) }}
+                            </span>
+                            <br>
+                            <span style="color: #e74c3c; font-weight: bold;">
+                                R$ {{ "%.2f"|format(produto.preco * (1 - pre_venda_ativa.get('desconto_geral', 0)/100)) }}
+                            </span>
+                        </p>
+                        {% else %}
+                        <p class="produto-preco">R$ {{ "%.2f"|format(produto.preco) }}</p>
+                        {% endif %}
+                        <p class="produto-estoque">
+                            <i class="fas fa-box"></i> 
+                            {% if produto.quantidade > 10 %}
+                                <span style="color: #28a745;">{{ produto.quantidade }} disponíveis</span>
+                            {% elif produto.quantidade > 0 %}
+                                <span style="color: #ffc107;">{{ produto.quantidade }} disponíveis</span>
+                            {% else %}
+                                <span style="color: #dc3545;">Esgotado</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <button class="btn-add-cart" 
+                            onclick="adicionarAoCarrinho({{ produto.id }}, '{{ produto.nome }}', {{ produto.preco }})"
+                            {% if produto.quantidade <= 0 %}disabled{% endif %}>
+                        {% if produto.quantidade <= 0 %}
+                            {% if pre_venda_ativa %}📅 Reservar{% else %}❌ Esgotado{% endif %}
+                        {% else %}🛒 Adicionar{% endif %}
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="carrinho-section">
+            <div class="carrinho-card">
+                <h3>🛍️ Seu Pedido</h3>
+                
+                <div class="tipo-pedido-group">
+                    <h4>📋 Tipo de Pedido:</h4>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="tipo_pedido" value="imediato" checked onchange="atualizarTipoPedido()">
+                            <span class="radio-label">
+                                <i class="fas fa-bolt"></i>
+                                Compra Imediata
+                                <small>Retirada agora</small>
+                            </span>
+                        </label>
+                        {% if pre_venda_ativa %}
+                        <label class="radio-option">
+                            <input type="radio" name="tipo_pedido" value="pre_venda" onchange="atualizarTipoPedido()">
+                            <span class="radio-label">
+                                <i class="fas fa-calendar"></i>
+                                Pré-venda
+                                <small>Retirada futura</small>
+                            </span>
+                        </label>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="carrinho-items" id="carrinho-items">
+                    <div class="empty-cart" id="empty-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <p>Seu carrinho está vazio</p>
+                    </div>
+                </div>
+
+                <div class="carrinho-total" id="carrinho-total">
+                    <span>Total:</span>
+                    <span>R$ 0,00</span>
+                </div>
+
+                <div class="pagamento-group">
+                    <h4>💳 Método de Pagamento:</h4>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="metodo_pagamento" value="dinheiro" checked>
+                            <span class="radio-label">
+                                <i class="fas fa-money-bill-wave"></i>
+                                Dinheiro
+                                <small>Pagamento na retirada</small>
+                            </span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="metodo_pagamento" value="pix">
+                            <span class="radio-label">
+                                <i class="fas fa-qrcode"></i>
+                                PIX
+                                <small>Pagamento na retirada</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="aviso-pagamento">
+                    <div class="aviso-icon">⚠️</div>
+                    <div class="aviso-content">
+                        <strong>ATENÇÃO:</strong> Aceitamos apenas DINHEIRO e PIX! 
+                        O pagamento será realizado no momento da retirada.
+                    </div>
+                </div>
+                <button type="button" class="btn-finalizar" id="btn-finalizar-pedido" onclick="finalizarPedido()">Finalizar Pedido</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Variáveis globais
+let tipoPedido = 'imediato';
+let carrinho = [];
+let preVendaAtiva = {{ 'true' if pre_venda_ativa else 'false' }};
+let descontoGeral = {{ pre_venda_ativa.get('desconto_geral', 0) if pre_venda_ativa else 0 }};
+
+// Função para debug - mostra o estado atual
+function debugCarrinho() {
+    console.log('🔍 DEBUG CARRINHO:', {
+        carrinho: carrinho,
+        localStorage: localStorage.getItem('carrinho'),
+        btnFinalizar: document.getElementById('btn-finalizar-pedido')
+    });
+}
+
+function atualizarTipoPedido() {
+    const selected = document.querySelector('input[name="tipo_pedido"]:checked');
+    if (selected) {
+        tipoPedido = selected.value;
+        atualizarInterfaceCarrinho();
+        
+        // Atualizar mensagem de aviso baseada no tipo de pedido
+        const avisoPagamento = document.querySelector('.aviso-content');
+        if (avisoPagamento) {
+            if (tipoPedido === 'imediato') {
+                avisoPagamento.innerHTML = '<strong>ATENÇÃO:</strong> Compra imediata - retirada agora! Aceitamos apenas DINHEIRO e PIX. Pagamento na retirada.';
+            } else {
+                avisoPagamento.innerHTML = '<strong>ATENÇÃO:</strong> Pré-venda - retirada futura! Aceitamos apenas DINHEIRO e PIX. Pagamento na retirada.';
+            }
+        }
+    }
+}
+
+// Função para verificar estoque em tempo real
+async function verificarEstoque(produtoId, quantidade) {
+    try {
+        const response = await fetch('/verificar_estoque', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                produto_id: produtoId,
+                quantidade: quantidade
+            })
+        });
+        
+        const data = await response.json();
+        return data.disponivel;
+    } catch (error) {
+        console.error('Erro ao verificar estoque:', error);
+        return false;
+    }
+}
+
+// Função para adicionar produto ao carrinho com verificação de estoque
+async function adicionarAoCarrinho(produtoId, produtoNome, produtoPreco) {
+    console.log('➕ Adicionando:', produtoId, produtoNome, produtoPreco);
+    
+    // Verificar se há estoque disponível
+    const estoqueDisponivel = await verificarEstoque(produtoId, 1);
+    
+    if (!estoqueDisponivel) {
+        alert('❌ Estoque insuficiente para este produto!');
+        return;
+    }
+    
+    // Garantir que temos um array válido
+    if (!carrinho || !Array.isArray(carrinho)) {
+        carrinho = [];
+    }
+    
+    produtoId = Number(produtoId);
+    produtoPreco = Number(produtoPreco);
+    
+    // Verificar se já existe no carrinho
+    let encontrado = false;
+    for (let i = 0; i < carrinho.length; i++) {
+        if (carrinho[i].id === produtoId) {
+            // Verificar estoque para quantidade adicional
+            const estoqueAdicional = await verificarEstoque(produtoId, carrinho[i].quantidade + 1);
+            if (!estoqueAdicional) {
+                alert('❌ Estoque insuficiente para adicionar mais unidades!');
+                return;
+            }
+            
+            carrinho[i].quantidade += 1;
+            encontrado = true;
+            break;
+        }
+    }
+    
+    if (!encontrado) {
+        carrinho.push({
+            id: produtoId,
+            nome: produtoNome,
+            preco: produtoPreco,
+            quantidade: 1
+        });
+    }
+    
+    // Salvar no localStorage
+    localStorage.setItem('carrinho', JSON.stringify(carrinho));
+    console.log('💾 Salvo no localStorage');
+    
+    // Atualizar visualização IMEDIATAMENTE
+    atualizarInterfaceCarrinho();
+    
+    // Mostrar feedback visual para o usuário
+    mostrarFeedbackAdicao(produtoNome);
+    
+    debugCarrinho();
+}
+
+// Função para mostrar feedback visual quando um produto é adicionado
+function mostrarFeedbackAdicao(nomeProduto) {
+    // Criar elemento de feedback
+    const feedback = document.createElement('div');
+    feedback.innerHTML = `
+        <div style="position: fixed; top: 20px; right: 20px; background: #48bb78; color: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; animation: slideIn 0.3s ease-out;">
+            <i class="fas fa-check-circle"></i> 
+            <strong>${nomeProduto}</strong> adicionado ao carrinho!
+        </div>
+    `;
+    
+    document.body.appendChild(feedback);
+    
+    // Remover após 3 segundos
+    setTimeout(() => {
+        feedback.style.animation = 'slideOut 0.3s ease-in';
+        setTimeout(() => feedback.remove(), 300);
+    }, 3000);
+}
+
+function removerDoCarrinho(produtoId) {
+    carrinho = carrinho.filter(item => item.id !== produtoId);
+    localStorage.setItem('carrinho', JSON.stringify(carrinho));
+    atualizarInterfaceCarrinho();
+}
+
+// Função para alterar quantidade com verificação de estoque
+async function alterarQuantidade(produtoId, alteracao) {
+    for (let i = 0; i < carrinho.length; i++) {
+        if (carrinho[i].id === produtoId) {
+            const novaQuantidade = carrinho[i].quantidade + alteracao;
+            
+            if (novaQuantidade <= 0) {
+                carrinho.splice(i, 1);
+                break;
+            }
+            
+            // Verificar estoque para nova quantidade
+            const estoqueDisponivel = await verificarEstoque(produtoId, novaQuantidade);
+            if (!estoqueDisponivel) {
+                alert('❌ Estoque insuficiente para esta quantidade!');
+                return;
+            }
+            
+            carrinho[i].quantidade = novaQuantidade;
+            break;
+        }
+    }
+    
+    localStorage.setItem('carrinho', JSON.stringify(carrinho));
+    atualizarInterfaceCarrinho();
+}
+
+// Função principal para atualizar a interface
+function atualizarInterfaceCarrinho() {
+    const carrinhoItems = document.getElementById('carrinho-items');
+    const carrinhoTotal = document.getElementById('carrinho-total');
+    const emptyCart = document.getElementById('empty-cart');
+    const btnFinalizar = document.getElementById('btn-finalizar-pedido');
+    const tipoPedidoSelecionado = document.querySelector('input[name="tipo_pedido"]:checked').value;
+    
+    if (!carrinhoItems || !btnFinalizar) {
+        console.error('Elementos não encontrados!');
+        return;
+    }
+    
+    // Limpar
+    carrinhoItems.innerHTML = '';
+    let total = 0;
+    let descontoAplicado = 0;
+    
+    // Verificar se há pré-venda ativa com desconto
+    const desconto = (preVendaAtiva && tipoPedidoSelecionado === 'pre_venda') ? descontoGeral : 0;
+    
+    if (carrinho.length === 0) {
+        if (emptyCart) emptyCart.style.display = 'block';
+        btnFinalizar.disabled = true;
+        btnFinalizar.style.opacity = '0.6';
+    } else {
+        if (emptyCart) emptyCart.style.display = 'none';
+        btnFinalizar.disabled = false;
+        btnFinalizar.style.opacity = '1';
+        
+        // Atualizar texto do botão baseado no tipo de pedido
+        if (tipoPedidoSelecionado === 'imediato') {
+            btnFinalizar.textContent = 'Finalizar Compra';
+        } else {
+            btnFinalizar.textContent = 'Finalizar Pedido';
+        }
+        
+        // Adicionar itens
+        carrinho.forEach(item => {
+            const precoOriginal = item.preco;
+            const precoComDesconto = precoOriginal * (1 - desconto / 100);
+            const itemTotal = precoComDesconto * item.quantidade;
+            total += itemTotal;
+            descontoAplicado += (precoOriginal - precoComDesconto) * item.quantidade;
+            
+            const itemHTML = `
+                <div class="carrinho-item">
+                    <div class="item-info">
+                        <span class="item-nome">${item.nome}</span>
+                        <span class="item-preco">
+                            ${desconto > 0 ? 
+                                '<span style="text-decoration: line-through; color: #999; margin-right: 5px;">R$ ' + precoOriginal.toFixed(2) + '</span>' : 
+                                ''}
+                            R$ ${precoComDesconto.toFixed(2)}
+                        </span>
+                    </div>
+                    <div class="item-controles">
+                        <button class="btn-quantidade" onclick="alterarQuantidade(${item.id}, -1)">-</button>
+                        <span class="item-quantidade">${item.quantidade}</span>
+                        <button class="btn-quantidade" onclick="alterarQuantidade(${item.id}, 1)">+</button>
+                        <button class="btn-remover" onclick="removerDoCarrinho(${item.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="item-total">R$ ${itemTotal.toFixed(2)}</div>
+                </div>
+            `;
+            
+            carrinhoItems.innerHTML += itemHTML;
+        });
+        
+        // Adicionar linha de desconto se houver
+        if (desconto > 0) {
+            const descontoHTML = `
+                <div class="desconto-info" style="display: flex; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 5px; margin-top: 10px;">
+                    <div style="font-weight: bold;">Desconto (${desconto}%):</div>
+                    <div style="color: #e74c3c; font-weight: bold;">- R$ ${descontoAplicado.toFixed(2)}</div>
+                </div>
+            `;
+            carrinhoItems.innerHTML += descontoHTML;
+        }
+    }
+    
+    // Atualizar total
+    if (carrinhoTotal) {
+        carrinhoTotal.innerHTML = `
+            <span>Total:</span>
+            <span>R$ ${total.toFixed(2)}</span>
+        `;
+    }
+}
+
+// Função para finalizar pedido com verificação final de estoque
+async function finalizarPedido() {
+    if (carrinho.length === 0) {
+        alert('Adicione produtos ao carrinho antes de finalizar o pedido.');
+        return;
+    }
+    
+    // Verificar estoque uma última vez antes de finalizar
+    for (const item of carrinho) {
+        const estoqueDisponivel = await verificarEstoque(item.id, item.quantidade);
+        if (!estoqueDisponivel) {
+            alert('❌ Estoque insuficiente para ' + item.nome + '! Atualize seu carrinho.');
+            return;
+        }
+    }
+    
+    const metodoPagamento = document.querySelector('input[name="metodo_pagamento"]:checked').value;
+    const tipoPedidoSelecionado = document.querySelector('input[name="tipo_pedido"]:checked').value;
+    
+    // Calcular total com desconto aplicado
+    const desconto = (preVendaAtiva && tipoPedidoSelecionado === 'pre_venda') ? descontoGeral : 0;
+    
+    let total = 0;
+    carrinho.forEach(item => {
+        const precoComDesconto = item.preco * (1 - desconto / 100);
+        total += precoComDesconto * item.quantidade;
+    });
+    
+    try {
+        const response = await fetch('/processar_pedido_cliente', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                produtos: carrinho,
+                metodo_pagamento: metodoPagamento,
+                tipo_pedido: tipoPedidoSelecionado,
+                total: total
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            if (tipoPedidoSelecionado === 'imediato') {
+                alert('✅ Compra realizada com sucesso! Seu pedido já foi processado como venda imediata');
+            } else {
+                alert('✅ Pedido de pré-venda realizado com sucesso! Aguarde a data de retirada.');
+            }
+            
+            // Limpar carrinho
+            carrinho = [];
+            localStorage.removeItem('carrinho');
+            atualizarInterfaceCarrinho();
+        } else {
+            alert('❌ Erro: ' + data.message);
+        }
+    } catch (error) {
+        alert('❌ Erro de conexão');
+    }
+}
+
+function filtrarProdutos() {
+    const busca = document.getElementById('busca-produto').value.toLowerCase();
+    const produtos = document.querySelectorAll('.produto-card');
+    
+    produtos.forEach(produto => {
+        const nome = produto.getAttribute('data-nome');
+        produto.style.display = nome.includes(busca) ? 'block' : 'none';
+    });
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Página carregada');
+    
+    // Carregar carrinho do localStorage
+    try {
+        const carrinhoStorage = localStorage.getItem('carrinho');
+        if (carrinhoStorage) {
+            carrinho = JSON.parse(carrinhoStorage);
+            console.log('📦 Carrinho carregado:', carrinho);
+        }
+    } catch (e) {
+        console.error('❌ Erro ao carregar carrinho:', e);
+        carrinho = [];
+        localStorage.removeItem('carrinho');
+    }
+    
+    // Atualizar interface
+    atualizarInterfaceCarrinho();
+    atualizarTipoPedido();
+    
+    // Debug
+    debugCarrinho();
+});
+
+// Função de teste manual
+function testarAdicao() {
+    console.log('🧪 Testando adição manual...');
+    adicionarAoCarrinho(1, 'Pão Francês', 0.50);
+}
+</script>
+
+<style>
+.pre-venda-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.pre-venda-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+/* Alertas */
+.alert-success {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    padding: 20px;
+    border-radius: 15px;
+    border-left: 5px solid #28a745;
+    margin-bottom: 30px;
+}
+
+.alert-success h3 {
+    color: #155724;
+    margin: 0 0 10px 0;
+}
+
+.alert-success p {
+    color: #0f5132;
+    margin: 5px 0;
+}
+
+/* Seção de Produtos */
+.produtos-section {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.section-header h3 {
+    color: #2d3748;
+    margin: 0;
+}
+
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-box .fas {
+    position: absolute;
+    left: 15px;
+    color: #a0aec0;
+}
+
+.search-box input {
+    padding: 12px 15px 12px 45px;
+    border: 2px solid #e2e8f0;
+    border-radius: 25px;
+    width: 250px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #4299e1;
+}
+
+/* Grid de Produtos */
+.produtos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.produto-card {
+    background: white;
+    border: 2px solid #f7fafc;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.produto-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-color: #4299e1;
+}
+
+.produto-image {
+    font-size: 3rem;
+    color: #ecc94b;
+    margin-bottom: 15px;
+}
+
+.produto-info h4 {
+    color: #2d3748;
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+}
+
+.produto-preco {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #2b6cb0;
+    margin: 10px 0;
+}
+
+.produto-estoque {
+    color: #718096;
+    font-size: 0.9rem;
+    margin: 5px 0;
+}
+
+.btn-add-cart {
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.btn-add-cart:hover:not(:disabled) {
+    background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+    transform: translateY(-2px);
+}
+
+.btn-add-cart:disabled {
+    background: #cbd5e0;
+    cursor: not-allowed;
+}
+
+/* Seção do Carrinho */
+.carrinho-section {
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+}
+
+.carrinho-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.carrinho-card h3 {
+    color: #2d3748;
+    margin: 0 0 20px 0;
+    text-align: center;
+}
+
+/* Grupos de Opções */
+.tipo-pedido-group,
+.pagamento-group {
+    margin-bottom: 25px;
+}
+
+.tipo-pedido-group h4,
+.pagamento-group h4 {
+    color: #4a5568;
+    margin: 0 0 15px 0;
+    font-size: 1rem;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.radio-option:hover {
+    border-color: #4299e1;
+    background: #f7fafc;
+}
+
+.radio-option input {
+    margin-right: 12px;
+}
+
+.radio-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.radio-label small {
+    color: #718096;
+    font-size: 0.8rem;
+}
+
+/* Itens do Carrinho */
+.carrinho-items {
+    margin: 20px 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.empty-cart {
+    text-align: center;
+    color: #a0aec0;
+    padding: 40px 20px;
+}
+
+.empty-cart .fas {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.carrinho-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    padding: 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background: #f7fafc;
+}
+
+.item-info {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-nome {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.item-preco {
+    color: #2b6cb0;
+    font-weight: 600;
+}
+
+.item-controles {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-quantidade {
+    background: #4299e1;
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-remover {
+    background: #e53e3e;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.item-quantidade {
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+}
+
+.item-total {
+    grid-column: 1 / -1;
+    text-align: right;
+    font-weight: bold;
+    color: #2d3748;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Total do Carrinho */
+.carrinho-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-top: 2px solid #e2e8f0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #2d3748;
+}
+
+/* Aviso de Pagamento */
+.aviso-pagamento {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #fffaf0;
+    border: 1px solid #feebc8;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 20px 0;
+    color: #744210;
+}
+
+.aviso-icon {
+    font-size: 1.5rem;
+}
+
+.aviso-content {
+    flex: 1;
+}
+
+.aviso-content strong {
+    color: #d69e2e;
+}
+
+/* Botão Finalizar */
+.btn-finalizar {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.btn-finalizar:not(:disabled) {
+    opacity: 1 !important;
+    cursor: pointer !important;
+}
+
+.btn-finalizar:disabled {
+    background: #cbd5e0 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
+/* Animações para o feedback */
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+    .pre-venda-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .carrinho-section {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .pre-venda-container {
+        padding: 15px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-box input {
+        width: 100%;
+    }
+    
+    .produtos-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .radio-group {
+        flex-direction: column;
+    }
+    
+    .carrinho-item {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .produto-card {
+        padding: 15px;
+    }
+    
+    .carrinho-card {
+        padding: 20px;
+    }
+    
+    .btn-add-cart,
+    .btn-finalizar {
+        padding: 12px 20px;
+    }
+}
+</style>
+{% endblock %}

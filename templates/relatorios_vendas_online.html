@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios de Vendas Online - A Turma do Forno{% endblock %}
+
+{% block content %}
+<div class="relatorios-container">
+    <h2><i class="fas fa-shopping-cart"></i> Relatórios de Vendas Online</h2>
+    
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-shopping-bag"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_pedidos }}</h3>
+                <p>Total de Pedidos</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <div class="stat-info">
+                <h3>R$ {{ "%.2f"|format(total_valor) }}</h3>
+                <p>Valor Total</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ pedidos_entregues }}</h3>
+                <p>Entregues</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ pedidos_pagos }}</h3>
+                <p>Pagos</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ pedidos_completos }}</h3>
+                <p>Completos</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="filtros-pedidos">
+        <h3>Filtros</h3>
+        <div class="filtros-botoes">
+            <button class="btn-filtro active" data-filtro="todos">Todos</button>
+            <button class="btn-filtro" data-filtro="pendentes">Pendentes</button>
+            <button class="btn-filtro" data-filtro="entregues">Entregues</button>
+            <button class="btn-filtro" data-filtro="pagos">Pagos</button>
+            <button class="btn-filtro" data-filtro="completos">Completos</button>
+        </div>
+    </div>
+    
+    <div class="table-container">
+        <h3>Pedidos de Pré-Venda</h3>
+        
+        <table id="tabela-pedidos">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Data</th>
+                    <th>Produtos</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Pagamento</th>
+                    <th>Desconto</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in pedidos %}
+                {% set status = pedido.get('status', {}) %}
+                {% if status is string %}
+                    {% if status == 'Entregue' %}
+                        {% set status = {'entregue': true, 'pago': false} %}
+                    {% elif status == 'Pago' %}
+                        {% set status = {'entregue': false, 'pago': true} %}
+                    {% else %}
+                        {% set status = {'entregue': false, 'pago': false} %}
+                    {% endif %}
+                {% endif %}
+                {% set is_entregue = status.get('entregue', false) %}
+                {% set is_pago = status.get('pago', false) %}
+                {% set status_class = 'completo' if is_entregue and is_pago else 'entregue' if is_entregue else 'pago' if is_pago else 'pendente' %}
+                
+                <tr class="pedido-row" data-status="{{ status_class }}">
+                    <td>{{ pedido.id }}</td>
+                    <td>{{ pedido.cliente_nome }}</td>
+                    <td>
+                        <strong>Pedido:</strong> {{ pedido.data }}<br>
+                        {% if pedido.get('data_entrega') %}
+                        <strong>Entrega:</strong> {{ pedido.data_entrega }}<br>
+                        {% endif %}
+                        {% if pedido.get('data_pagamento') %}
+                        <strong>Pagamento:</strong> {{ pedido.data_pagamento }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <ul>
+                            {% for produto in pedido.produtos %}
+                            <li>{{ produto.nome }} ({{ produto.quantidade }} x R$ {{ "%.2f"|format(produto.preco) }})</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>R$ {{ "%.2f"|format(pedido.total) }}</td>
+                    <td>
+                        <div class="status-indicators">
+                            <span class="status-indicator {{ 'active' if is_entregue else '' }}" title="Entregue">
+                                <i class="fas fa-truck"></i>
+                            </span>
+                            <span class="status-indicator {{ 'active' if is_pago else '' }}" title="Pago">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge pagamento-badge {{ pedido.metodo_pagamento|lower }}">
+                            {{ pedido.metodo_pagamento|capitalize }}
+                        </span>
+                    </td>
+                    <td>{{ pedido.get('desconto_aplicado', 0) }}%</td>
+                    <td>
+                        <div class="acoes-pedido">
+                            <form method="POST" action="/atualizar_status_pedido/{{ pedido.id }}" class="form-acao">
+                                <input type="hidden" name="action" value="toggle_entrega">
+                                <button type="submit" class="btn-status {{ 'btn-active' if is_entregue else '' }}" title="{{ 'Desmarcar entrega' if is_entregue else 'Marcar como entregue' }}">
+                                    <i class="fas fa-truck"></i>
+                                </button>
+                            </form>
+                            
+                            <form method="POST" action="/atualizar_status_pedido/{{ pedido.id }}" class="form-acao">
+                                <input type="hidden" name="action" value="toggle_pagamento">
+                                <button type="submit" class="btn-status {{ 'btn-active' if is_pago else '' }}" title="{{ 'Desmarcar pagamento' if is_pago else 'Marcar como pago' }}">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                </button>
+                            </form>
+                            
+                            <form method="POST" action="/excluir_pedido/{{ pedido.id }}" class="form-acao" 
+                                  onsubmit="return confirm('Tem certeza que deseja excluir este pedido?')">
+                                <button type="submit" class="btn-excluir" title="Excluir pedido">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" style="text-align: center;">Nenhum pedido de pré-venda encontrado</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.relatorios-container {
+    padding: 20px;
+}
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.stat-icon {
+    font-size: 1.8rem;
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+
+.stat-info h3 {
+    font-size: 1.5rem;
+    margin: 0 0 5px 0;
+    color: var(--primary);
+}
+
+.stat-info p {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.filtros-pedidos {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.filtros-pedidos h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--primary);
+}
+
+.filtros-botoes {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-filtro {
+    padding: 8px 16px;
+    border: 2px solid var(--primary-light);
+    background: white;
+    color: var(--primary);
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.btn-filtro:hover,
+.btn-filtro.active {
+    background: var(--primary);
+    color: white;
+}
+
+.table-container {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow-x: auto;
+}
+
+.table-container h3 {
+    margin-top: 0;
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    min-width: 900px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+th {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+tr:hover {
+    background: #f8f9fa;
+}
+
+ul {
+    margin: 0;
+    padding-left: 15px;
+}
+
+li {
+    margin-bottom: 3px;
+    font-size: 0.85rem;
+}
+
+/* Status indicators */
+.status-indicators {
+    display: flex;
+    gap: 10px;
+}
+
+.status-indicator {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9ecef;
+    color: #6c757d;
+    transition: all 0.3s ease;
+}
+
+.status-indicator.active {
+    background: var(--primary);
+    color: white;
+}
+
+/* Badges de pagamento */
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.pagamento-badge.dinheiro {
+    background-color: #28a745;
+    color: white;
+}
+
+.pagamento-badge.pix {
+    background-color: #17a2b8;
+    color: white;
+}
+
+/* Ações */
+.acoes-pedido {
+    display: flex;
+    gap: 5px;
+}
+
+.form-acao {
+    margin: 0;
+}
+
+.btn-status,
+.btn-excluir {
+    width: 35px;
+    height: 35px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-status {
+    background-color: #e9ecef;
+    color: #6c757d;
+}
+
+.btn-status:hover,
+.btn-active {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-excluir {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-excluir:hover {
+    background-color: #c82333;
+}
+
+/* Cores para diferentes status */
+.pedido-row[data-status="completo"] {
+    background-color: #d4edda !important;
+}
+
+.pedido-row[data-status="entregue"] {
+    background-color: #fff3cd !important;
+}
+
+.pedido-row[data-status="pago"] {
+    background-color: #cce5ff !important;
+}
+
+.pedido-row[data-status="pendente"] {
+    background-color: #f8f9fa !important;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+    .stats-cards {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .filtros-botoes {
+        justify-content: center;
+    }
+    
+    .table-container {
+        padding: 15px;
+    }
+    
+    th, td {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .status-indicators {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .status-indicator {
+        width: 25px;
+        height: 25px;
+        font-size: 0.8rem;
+    }
+    
+    .btn-status,
+    .btn-excluir {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .relatorios-container {
+        padding: 10px;
+    }
+    
+    .stats-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .filtros-botoes {
+        flex-direction: column;
+    }
+    
+    .btn-filtro {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .acoes-pedido {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtros de pedidos
+    const botoesFiltro = document.querySelectorAll('.btn-filtro');
+    const linhasPedidos = document.querySelectorAll('.pedido-row');
+    
+    botoesFiltro.forEach(botao => {
+        botao.addEventListener('click', function() {
+            // Remover classe active de todos os botões
+            botoesFiltro.forEach(b => b.classList.remove('active'));
+            // Adicionar classe active ao botão clicado
+            this.classList.add('active');
+            
+            const filtro = this.dataset.filtro;
+            
+            linhasPedidos.forEach(linha => {
+                if (filtro === 'todos') {
+                    linha.style.display = '';
+                } else if (filtro === 'pendentes') {
+                    linha.style.display = linha.dataset.status === 'pendente' ? '' : 'none';
+                } else if (filtro === 'entregues') {
+                    linha.style.display = linha.dataset.status === 'entregue' ? '' : 'none';
+                } else if (filtro === 'pagos') {
+                    linha.style.display = linha.dataset.status === 'pago' ? '' : 'none';
+                } else if (filtro === 'completos') {
+                    linha.style.display = linha.dataset.status === 'completo' ? '' : 'none';
+                }
+            });
+        });
+    });
+    
+    // Confirmar exclusão
+    const formsExclusao = document.querySelectorAll('form[onsubmit]');
+    formsExclusao.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (!confirm('Tem certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

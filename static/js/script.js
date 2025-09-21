@@ -1,4 +1,9 @@
 // Máscara para CPF
+// Ignorar erro de extensões
+if (chrome && chrome.runtime && chrome.runtime.lastError) {
+    chrome.runtime.lastError.message = '';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const cpfInputs = document.querySelectorAll('.cpf-mask');
     
@@ -138,7 +143,9 @@ function finalizarVenda() {
             alert('Venda realizada com sucesso!');
             localStorage.removeItem('carrinho');
             atualizarCarrinho();
-            document.getElementById('cpf-cliente').value = '';
+            if (document.getElementById('cpf-cliente')) {
+                document.getElementById('cpf-cliente').value = '';
+            }
         } else {
             alert('Erro ao processar venda.');
         }
@@ -151,28 +158,43 @@ function finalizarVenda() {
 
 // Inicializar carrinho quando a página carregar
 document.addEventListener('DOMContentLoaded', function() {
-    if (window.location.pathname === '/pdv') {
+    if (window.location.pathname === '/pdv' || window.location.pathname === '/pre_venda') {
         atualizarCarrinho();
     }
 });
+
 // Modal para aumentar estoque
 function abrirModalAumentarEstoque(produtoId, produtoNome) {
     document.getElementById('produto_id').value = produtoId;
     document.getElementById('produto_nome').value = produtoNome;
     document.getElementById('modal-estoque').style.display = 'block';
+    
+    // Definir data atual
+    const hoje = new Date();
+    const dataFormatada = hoje.toISOString().split('T')[0];
+    document.getElementById('data').value = dataFormatada;
 }
 
-// Fechar modal quando clicar no X
-document.querySelector('.close').addEventListener('click', function() {
-    document.getElementById('modal-estoque').style.display = 'none';
-});
-
-// Fechar modal quando clicar fora dele
-window.addEventListener('click', function(event) {
+// Função para fechar modal
+function fecharModal() {
     const modal = document.getElementById('modal-estoque');
-    if (event.target === modal) {
+    if (modal) {
         modal.style.display = 'none';
     }
+}
+
+// Event listeners seguros para o modal
+document.addEventListener('DOMContentLoaded', function() {
+    const closeBtn = document.querySelector('.close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', fecharModal);
+    }
+    
+    window.addEventListener('click', function(event) {
+        if (event.target === document.getElementById('modal-estoque')) {
+            fecharModal();
+        }
+    });
 });
 
 // Confirmar exclusão de usuário
@@ -181,6 +203,7 @@ function confirmarExclusao(event) {
         event.preventDefault();
     }
 }
+
 // Header interativo
 document.addEventListener('DOMContentLoaded', function() {
     // Destacar item do menu ativo
@@ -196,20 +219,23 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Header com efeito de scroll
     const header = document.querySelector('header');
-    let lastScroll = 0;
-    
-    window.addEventListener('scroll', function() {
-        const currentScroll = window.pageYOffset;
+    if (header) {
+        let lastScroll = 0;
         
-        if (currentScroll > lastScroll && currentScroll > 100) {
-            header.style.transform = 'translateY(-100%)';
-        } else {
-            header.style.transform = 'translateY(0)';
-        }
-        
-        lastScroll = currentScroll;
-    });
+        window.addEventListener('scroll', function() {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > lastScroll && currentScroll > 100) {
+                header.style.transform = 'translateY(-100%)';
+            } else {
+                header.style.transform = 'translateY(0)';
+            }
+            
+            lastScroll = currentScroll;
+        });
+    }
 });
+
 // Fallback para imagem da logo
 document.addEventListener('DOMContentLoaded', function() {
     const logoImg = document.querySelector('.logo-img');
@@ -217,7 +243,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (logoImg) {
         logoImg.onerror = function() {
             this.style.display = 'none';
-            // A pseudoclasse :before do CSS já mostra o fallback "TF"
         };
         
         // Verifica se a imagem carregou corretamente
@@ -225,34 +250,8 @@ document.addEventListener('DOMContentLoaded', function() {
             logoImg.style.display = 'none';
         }
     }
-    
-    // Destacar item do menu ativo
-    const currentPage = window.location.pathname;
-    const navLinks = document.querySelectorAll('header nav a');
-    
-    navLinks.forEach(link => {
-        if (link.getAttribute('href') === currentPage) {
-            link.style.background = 'rgba(255, 255, 255, 0.2)';
-            link.style.fontWeight = '600';
-        }
-    });
-    
-    // Header com efeito de scroll
-    const header = document.querySelector('header');
-    let lastScroll = 0;
-    
-    window.addEventListener('scroll', function() {
-        const currentScroll = window.pageYOffset;
-        
-        if (currentScroll > lastScroll && currentScroll > 100) {
-            header.style.transform = 'translateY(-100%)';
-        } else {
-            header.style.transform = 'translateY(0)';
-        }
-        
-        lastScroll = currentScroll;
-    });
 });
+
 // Ajuste fino da imagem da logo
 document.addEventListener('DOMContentLoaded', function() {
     const logoImg = document.querySelector('.logo-img');
@@ -270,5 +269,51 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.display = 'none';
             console.log('Logo não carregada, usando fallback');
         };
+    }
+});
+
+// Filtrar produtos na busca
+function filtrarProdutos() {
+    const busca = document.getElementById('busca-produto').value.toLowerCase();
+    const produtos = document.querySelectorAll('.produto-card');
+    
+    produtos.forEach(produto => {
+        const nome = produto.getAttribute('data-nome');
+        if (nome && nome.includes(busca)) {
+            produto.style.display = 'block';
+        } else {
+            produto.style.display = 'none';
+        }
+    });
+}
+
+function confirmarExclusaoProduto(produtoId, produtoNome) {
+    if (confirm(`Tem certeza que deseja excluir o produto "${produtoNome}"? Esta ação não pode ser desfeita.`)) {
+        window.location.href = `/excluir_produto/${produtoId}`;
+    }
+}
+// Funções para pré-vendas com desconto
+function aplicarDescontoPreVenda() {
+    const preVendaAtiva = document.querySelector('.pre-venda-info');
+    if (preVendaAtiva) {
+        const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+        const desconto = parseFloat(preVendaAtiva.dataset.desconto || 0);
+        
+        if (desconto > 0 && carrinho.length > 0) {
+            carrinho.forEach(item => {
+                item.precoOriginal = item.precoOriginal || item.preco;
+                item.preco = item.precoOriginal * (1 - desconto / 100);
+            });
+            
+            localStorage.setItem('carrinho', JSON.stringify(carrinho));
+            atualizarCarrinho();
+        }
+    }
+}
+
+// Inicializar quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.pathname === '/pre_venda') {
+        aplicarDescontoPreVenda();
     }
 });

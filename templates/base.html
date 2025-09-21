@@ -14,22 +14,46 @@
             <div class="header-content">
                 <a href="{{ url_for('dashboard') }}" class="logo">
                     <div class="logo-image">
-                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo Turma do Forno" class="logo-img" style="margin-left: 1cm;">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo Turma do Forno" class="logo-img">
                     </div>
                     <div class="logo-text">Turma do Forno</div>
                 </a>
                 <nav>
                     {% if session.user_id %}
                         <span class="user-greeting">Olá, {{ session.user_nome }}</span>
-                        <a href="{{ url_for('dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
-                        <a href="{{ url_for('estoque') }}"><i class="fas fa-boxes"></i> Estoque</a>
-                        <a href="{{ url_for('pdv') }}"><i class="fas fa-cash-register"></i> PDV</a>
-                        <a href="{{ url_for('cadastro_produto') }}"><i class="fas fa-plus-circle"></i> Cadastrar</a>
-                        <a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a>
-                        {% if session.is_admin %}
-                        <a href="{{ url_for('gerenciar_usuarios') }}"><i class="fas fa-users"></i> Usuários</a>
+                        
+                        {% if session.user_tipo != 'cliente' %}
+                            {% if 'visualizar_estoque' in session.user_permissoes %}
+                            <a href="{{ url_for('estoque') }}"><i class="fas fa-boxes"></i> Estoque</a>
+                            {% endif %}
+                            
+                            {% if 'realizar_vendas' in session.user_permissoes %}
+                            <a href="{{ url_for('pdv') }}"><i class="fas fa-cash-register"></i> PDV</a>
+                            {% endif %}
+                            
+                            {% if 'cadastrar_produtos' in session.user_permissoes %}
+                            <a href="{{ url_for('cadastro_produto') }}"><i class="fas fa-plus-circle"></i> Cadastrar</a>
+                            {% endif %}
+                            
+                            {% if 'visualizar_relatorios' in session.user_permissoes %}
+                            <a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a>
+                            <a href="{{ url_for('relatorios_vendas_online') }}"><i class="fas fa-shopping-cart"></i> Vendas Online</a>
+                            {% endif %}
+                            
+                            {% if 'gerenciar_usuarios' in session.user_permissoes %}
+                            <a href="{{ url_for('gerenciar_usuarios') }}"><i class="fas fa-users"></i> Usuários</a>
+                            {% endif %}
+                            
+                            {% if 'gerenciar_pre_vendas' in session.user_permissoes %}
+                            <a href="{{ url_for('gerenciar_pre_vendas') }}"><i class="fas fa-calendar-alt"></i> Pré-vendas</a>
+                            {% endif %}
                         {% endif %}
-                        <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Sair</a>
+                        
+                        {% if 'fazer_pedidos' in session.user_permissoes or session.user_tipo == 'cliente' %}
+                        <a href="{{ url_for('pre_venda') }}"><i class="fas fa-shopping-bag"></i> Comprar</a>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Sair</a>
                     {% endif %}
                 </nav>
             </div>
@@ -37,11 +61,11 @@
     </header>
 
     <main class="container">
-        {% with messages = get_flashed_messages() %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="flash-messages">
-                    {% for message in messages %}
-                        <div class="flash-message">{{ message }}</div>
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
                     {% endfor %}
                 </div>
             {% endif %}

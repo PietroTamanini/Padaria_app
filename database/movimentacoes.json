@@ -1,20 +1,133 @@
 [
     {
         "id": 1,
-        "produto_id": 1,
-        "produto_nome": "P\u00e3o Franc\u00eas",
+        "produto_id": 6,
+        "produto_nome": "Pão de Queijo",
         "quantidade": 1,
-        "tipo": "sa\u00edda",
-        "usuario": "Administrador Principal",
-        "data": "20/08/2025 23:15"
+        "tipo": "entrada_inicial",
+        "usuario": "Pietro",
+        "data": "20/09/2025 18:35:56"
     },
     {
         "id": 2,
         "produto_id": 1,
-        "produto_nome": "P\u00e3o Franc\u00eas",
+        "produto_nome": "Pão Francês",
+        "quantidade": 50,
+        "tipo": "exclusao",
+        "usuario": "Pietro",
+        "data": "20/09/2025 18:36:05"
+    },
+    {
+        "id": 3,
+        "produto_id": 2,
+        "produto_nome": "Bolo de Chocolate",
+        "quantidade": 8,
+        "tipo": "exclusao",
+        "usuario": "Pietro",
+        "data": "20/09/2025 18:36:06"
+    },
+    {
+        "id": 4,
+        "produto_id": 3,
+        "produto_nome": "Café",
+        "quantidade": 30,
+        "tipo": "exclusao",
+        "usuario": "Pietro",
+        "data": "20/09/2025 18:36:08"
+    },
+    {
+        "id": 5,
+        "produto_id": 5,
+        "produto_nome": "Croissant",
+        "quantidade": 20,
+        "tipo": "exclusao",
+        "usuario": "Pietro",
+        "data": "20/09/2025 18:36:10"
+    },
+    {
+        "id": 6,
+        "produto_id": 4,
+        "produto_nome": "Suco Natural",
+        "quantidade": 25,
+        "tipo": "exclusao",
+        "usuario": "Pietro",
+        "data": "20/09/2025 18:36:12"
+    },
+    {
+        "id": 7,
+        "produto_id": 6,
+        "produto_nome": "Pão de Queijo",
         "quantidade": 1,
-        "tipo": "sa\u00edda",
-        "usuario": "Administrador Principal",
-        "data": "20/08/2025 23:15"
+        "tipo": "exclusao",
+        "usuario": "Pietro",
+        "data": "20/09/2025 18:36:13"
+    },
+    {
+        "id": 8,
+        "produto_id": 1,
+        "produto_nome": "´1",
+        "quantidade": 1,
+        "tipo": "entrada_inicial",
+        "usuario": "Pietro",
+        "data": "20/09/2025 19:24:42"
+    },
+    {
+        "id": 9,
+        "produto_id": 1,
+        "produto_nome": "´1",
+        "quantidade": 1,
+        "tipo": "saída",
+        "usuario": "Pietro",
+        "data": "20/09/2025 19:37:15",
+        "observacao": "Pedido online"
+    },
+    {
+        "id": 10,
+        "produto_id": 1,
+        "produto_nome": "´1",
+        "quantidade": 100,
+        "tipo": "entrada",
+        "usuario": "Pietro",
+        "data": "2025-09-20"
+    },
+    {
+        "id": 11,
+        "produto_id": 1,
+        "produto_nome": "´1",
+        "quantidade": 1,
+        "tipo": "saída",
+        "usuario": "Pietro",
+        "data": "20/09/2025 19:38:23",
+        "observacao": "Pedido online"
+    },
+    {
+        "id": 12,
+        "produto_id": 1,
+        "produto_nome": "´1",
+        "quantidade": 1,
+        "tipo": "saída",
+        "usuario": "Pietro",
+        "data": "20/09/2025 21:31:59",
+        "observacao": "Pedido online - Compra Imediata"
+    },
+    {
+        "id": 13,
+        "produto_id": 1,
+        "produto_nome": "´1",
+        "quantidade": 1,
+        "tipo": "saída",
+        "usuario": "Pietro",
+        "data": "20/09/2025 22:01:40",
+        "observacao": "Pedido online - Compra Imediata"
+    },
+    {
+        "id": 14,
+        "produto_id": 1,
+        "produto_nome": "´1",
+        "quantidade": 1,
+        "tipo": "saída",
+        "usuario": "Pietro",
+        "data": "20/09/2025 22:02:16",
+        "observacao": "Pedido online - Compra Imediata"
     }
 ]
